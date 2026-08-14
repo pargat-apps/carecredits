@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./design/**/code.html)",
+      "Read(./design/**/*.png)",
+      "Read(./contracts/.env)",
+      "Read(./frontend/.env.local)",
+      "Read(./contracts/lib/**)",
+      "Read(./**/out/**)",
+      "Read(./**/cache/**)",
+      "Read(./**/node_modules/**)"
+    ],
+    "allow": [
+      "Bash(forge:*)",
+      "Bash(cast:*)",
+      "Bash(anvil:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ]
+  }
+}
