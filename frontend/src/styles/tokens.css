@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Colors */
+  --color-background: #FCF9F4;
+
+  --color-surface-lowest: #FFFFFF;
+  --color-surface-low: #F6F3EE;
+  --color-surface: #F0EDE9;
+  --color-surface-high: #EBE8E3;
+  --color-surface-highest: #E5E2DD;
+  --color-surface-dim: #DCDAD5;
+  --color-surface-inverse: #31302D;
+
+  --color-ink: #1C1C19;
+  --color-ink-variant: #44474C;
+  --color-ink-inverse: #F3F0EB;
+
+  --color-line: #75777D;
+  --color-line-variant: #C5C6CC;
+
+  --color-brand: #000000;
+  --color-brand-on: #FFFFFF;
+  --color-brand-navy: #101C2B;
+  --color-brand-on-navy: #798498;
+
+  --color-teal: #006A62;
+  --color-teal-on: #FFFFFF;
+  --color-teal-container: #83F2E5;
+  --color-teal-on-container: #006F67;
+
+  --color-deep: #00201C;
+  --color-deep-on: #009485;
+  --color-deep-glow: #62FAE3;
+
+  --color-hero-start: #071322;
+  --color-hero-end: #11998E;
+
+  --color-ok-container: #DCFCE7;
+  --color-ok-on: #166534;
+
+  --color-warn: #B45309;
+
+  --color-danger: #BA1A1A;
+  --color-danger-container: #FFDAD6;
+  --color-danger-on-container: #93000A;
+
+  /* Typography */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-default: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* Spacing */
+  --space-stack-sm: 8px;
+  --space-stack-md: 16px;
+  --space-stack-lg: 24px;
+  --space-gutter: 24px;
+  --space-container-margin: 32px;
+  --space-section-gap: 64px;
+
+  /* Shadows */
+  --shadow-e1: 0 1px 8px rgba(0,0,0,0.04);
+  --shadow-e1-up: 0 -1px 8px rgba(0,0,0,0.04);
+  --shadow-e2: 0 10px 25px -5px rgba(7,19,34,0.04);
+  --shadow-e3: 0 20px 50px -10px rgba(0,0,0,0.3);
+  --shadow-teal: 0 4px 12px rgba(0,106,98,0.2);
+  --shadow-glow: 0 0 40px rgba(131,242,229,0.4);
+  --shadow-selected: inset 0 0 0 2px #006A62, 0 10px 30px -5px rgba(0,106,98,0.2);
+
+  /* Gradients */
+  --gradient-hero: linear-gradient(to bottom right, #071322, #11998E);
+  --gradient-hero-rev: linear-gradient(to bottom right, #11998E, #071322);
+  --gradient-balance: linear-gradient(to bottom right, #101C2B, #006A62);
+  --gradient-cta: linear-gradient(to right, #000000, #006A62);
+  --gradient-dots: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.4) 1px, transparent 0);
+  --gradient-dots-size: 32px 32px;
+
+  /* Layout */
+  --max-width-content: 1280px;
+
+  /* Transitions */
+  --duration-micro: 150ms;
+  --duration-panel: 240ms;
+  --duration-page: 360ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
