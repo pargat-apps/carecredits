@@ -14,8 +14,9 @@ contract CareCreditsRolesTest is BaseTest {
         address newIssuer = makeAddr("newIssuer");
 
         // Act
+        bytes32 role = credits.ISSUER_ROLE();
         vm.prank(admin);
-        credits.grantRole(credits.ISSUER_ROLE(), newIssuer);
+        credits.grantRole(role, newIssuer);
 
         // Assert
         assertTrue(credits.hasRole(credits.ISSUER_ROLE(), newIssuer));
@@ -25,11 +26,12 @@ contract CareCreditsRolesTest is BaseTest {
     // collapsing DEFAULT_ADMIN_ROLE's exclusivity entirely.
     function test_GrantRole_RevertsWhen_CallerIsNotAdmin() public {
         // Arrange / Act / Assert
+        bytes32 role = credits.ISSUER_ROLE();
         vm.expectRevert(
             abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, stranger, bytes32(0))
         );
         vm.prank(stranger);
-        credits.grantRole(credits.ISSUER_ROLE(), stranger);
+        credits.grantRole(role, stranger);
     }
 
     // AC-25 / FR-C-16 (revoke half). Failure here means a compromised or departing
@@ -40,8 +42,9 @@ contract CareCreditsRolesTest is BaseTest {
         assertTrue(credits.hasRole(credits.ISSUER_ROLE(), issuer));
 
         // Act
+        bytes32 role = credits.ISSUER_ROLE();
         vm.prank(admin);
-        credits.revokeRole(credits.ISSUER_ROLE(), issuer);
+        credits.revokeRole(role, issuer);
 
         // Assert
         assertFalse(credits.hasRole(credits.ISSUER_ROLE(), issuer));
@@ -54,8 +57,9 @@ contract CareCreditsRolesTest is BaseTest {
         address newProvider = makeAddr("newProvider");
 
         // Act
+        bytes32 role = credits.PROVIDER_ROLE();
         vm.prank(admin);
-        credits.grantRole(credits.PROVIDER_ROLE(), newProvider);
+        credits.grantRole(role, newProvider);
 
         // Assert
         assertTrue(credits.hasRole(credits.PROVIDER_ROLE(), newProvider));
@@ -67,10 +71,11 @@ contract CareCreditsRolesTest is BaseTest {
         // Arrange — issuer holds ISSUER_ROLE but not DEFAULT_ADMIN_ROLE
 
         // Act / Assert
+        bytes32 role = credits.PROVIDER_ROLE();
         vm.expectRevert(
             abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, issuer, bytes32(0))
         );
         vm.prank(issuer);
-        credits.grantRole(credits.PROVIDER_ROLE(), issuer);
+        credits.grantRole(role, issuer);
     }
 }
