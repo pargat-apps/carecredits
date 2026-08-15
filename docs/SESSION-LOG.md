@@ -126,3 +126,35 @@ Never edit or delete an earlier entry.
 - **Every stub body reverts `NotImplemented()`**, confirmed by `forge test` — every one of the 6 suites fails with `[FAIL: NotImplemented()] setUp()`. One exception to literal body-only-revert: the constructor's body is `_stub();`, a call to a private one-line helper that itself does `revert NotImplemented();` — required to work around a real Solidity 0.8.25 compiler limitation (immutable-assignment analysis breaks on a bare unconditional `revert` in a derived constructor). Behaviour is identical to a direct revert.
 - **Because the constructor stub reverts unconditionally, `setUp()` never completes, so none of the 37 tests currently reach their own Act/Assert lines** — all 37 fail identically at setup. This is expected and resolves itself the moment Session 05 implements a working constructor; each test will then exercise its own logic independently for the first time.
 - OQ-A, OQ-B, OQ-C (spec §16) did not block this session — all three concern the script suite or `renounceRole`, neither in scope here.
+
+## Session 05 — Contract implementation (2026-08-14)
+
+**Goal:** Implement `CareCredits.sol` until every existing test passes, and nothing more.
+
+**Completed:**
+- Read `specs/contract/carecredits-token.md`, `contracts/test/unit/**`, `docs/ARCHITECTURE.md` §6, and the `solidity-house-style` skill; confirmed baseline: 0 passed, 6 suites failed, all at `setUp()` with `NotImplemented()`, 37 individual test functions total
+- Used context7 to fetch OZ 5.x docs, then cross-checked against the actual installed `lib/openzeppelin-contracts` v5.7.0 source (the docs' `_update` snippet had a wrong return type, so the local source was the deciding reference)
+- Implemented the constructor: `ERC20`/`ERC20Capped` wiring, `ZeroAddress()` on a zero admin, `_grantRole(DEFAULT_ADMIN_ROLE, admin)` (the internal variant — the public `grantRole` is `onlyRole`-gated and unsatisfiable during construction)
+- Implemented `_update`: rejects `from != address(0) && to != address(0)` with `TransfersDisabled()` **before** calling `super._update`, since `ERC20Capped._update` checks the cap only *after* its own `super._update` call
+- **Removed** the stubbed `transfer` override entirely — the inherited `ERC20.transfer` already routes through `_update`, so a separate override was redundant scope the tests never required (AC-13 passes via inheritance)
+- Implemented `transferFrom` and `approve` as unconditional-revert overrides (`TransfersDisabled()` / `ApprovalsDisabled()`) — required because neither routes through `_update` cleanly (`transferFrom` calls `_spendAllowance` first; `approve` never touches `_update` at all)
+- Implemented `issue` (role → zero-address → zero-amount → inherited cap check via `_mint`) and `redeem` (role → zero-holder → zero-amount → zero-serviceRef → explicit balance pre-check → `_burn`), matching the exact validation order in spec §7/§8
+- Implemented `remainingIssuable` as `cap() - totalSupply()`
+- Deleted `error NotImplemented();` and the `_stub()` compiler-workaround helper; updated the stale contract-level NatSpec
+- **Found and fixed a test-authoring bug**, with the user's explicit one-time permission to edit `contracts/test/**` (normally off-limits this session): six tests inlined `credits.ISSUER_ROLE()` / `credits.PROVIDER_ROLE()` as a call argument in the same statement immediately following `vm.prank(...)` or `vm.expectRevert(...)`. Foundry's cheatcodes apply only to the *very next* external call, and Solidity evaluates call arguments before the call itself — so the inline getter call silently consumed the prank/expectRevert, leaving the intended call (`grantRole`/`revokeRole`/`issue`) running unpranked. Fixed by hoisting the role lookup into a local `bytes32 role` variable before the cheatcode call, in six places across `CareCredits.roles.t.sol` (5) and `CareCredits.issue.t.sol` (1). No assertion, revert expectation, or test intent was changed — only call ordering.
+
+**Exit criteria met:**
+- ✅ `forge build` passes
+- ✅ `forge test` — all 37 tests green (verified twice: once naturally at 31/37 before the test fix, then 37/37 after)
+- ✅ `grep -c NotImplemented contracts/src/CareCredits.sol` returns 0
+- ✅ `forge fmt --check` clean
+- ✅ Every function in the contract is exercised by at least one test (table in handoff below)
+- ✅ No function exists that the spec did not require — `transfer` override removed as redundant; nothing else added
+- ⚠️ Test files were modified — outside this session's normal OWNS list — but only with the user's explicit, in-conversation permission, scoped to the one prank-consumption bug described above. No assertions changed.
+
+**Handoff notes for Session 06:**
+- **OpenZeppelin v5.7.0**, confirmed against the installed `lib/openzeppelin-contracts` source directly (not just context7's docs, which had a paraphrasing error on `_update`'s return type). Confirmed: `_update(address,address,uint256)` is `internal virtual override`, no return value; `ERC20Capped._update` calls `super._update` **before** its cap check; `ERC20Capped(uint256 cap_)` reverts `ERC20InvalidCap(0)` on a zero cap; `AccessControl._grantRole(bytes32,address) internal virtual returns (bool)` bypasses the `onlyRole` gate that the public `grantRole` carries; `AccessControlUnauthorizedAccount(address account, bytes32 neededRole)` is the exact unauthorized-caller error.
+- **Final function list:** `constructor`, `issue`, `redeem`, `remainingIssuable`, `approve` (override, always reverts), `transferFrom` (override, always reverts), `_update` (override). `transfer` is **not** overridden — it inherits `ERC20.transfer` directly and is blocked purely by `_update`.
+- **Ambiguity resolved during implementation, not left open:** the spec text alone didn't obviously state validation order for `issue`/`redeem` when multiple conditions are violated at once, but spec §7/§8's tables did fix an explicit order (role → zero-address → zero-amount → \[serviceRef\] → cap/balance) — followed exactly, no guessing required.
+- **Highest risk for the invariant suite to probe:** the `_update` ordering (cap check runs after `super._update`, not before — verified against source, not just docs) and the interaction between `issue`'s reliance on the *inherited* cap check versus `redeem`'s *explicit* balance pre-check — two different enforcement strategies for what are structurally similar guards. Also worth fuzzing: the boundary at `amount == remainingIssuable()` (tested for happy path in AC-35, but not fuzzed) and repeated issue/redeem cycles that approach and retreat from the cap.
+- **The test bug fix is worth a second look from a human.** I hoisted six role lookups into local variables; I'm confident in the diagnosis (traced with `-vvvv`, reproduced consistently, root-caused to Foundry's single-call `vm.prank`/`vm.expectRevert` semantics colliding with an inlined external call), but per house rules I don't touch tests without explicit permission, and this was a one-time exception granted mid-session — Session 06 should not assume this pattern is generally safe to fix without asking again.

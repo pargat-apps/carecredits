@@ -71,15 +71,12 @@ contract CareCreditsIssueTest is BaseTest {
     // does not actually stop them from minting — role revocation would be theatre.
     function test_Issue_RevertsAfter_IssuerRoleRevoked() public {
         // Arrange
+        bytes32 role = credits.ISSUER_ROLE();
         vm.prank(admin);
-        credits.revokeRole(credits.ISSUER_ROLE(), issuer);
+        credits.revokeRole(role, issuer);
 
         // Act / Assert
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IAccessControl.AccessControlUnauthorizedAccount.selector, issuer, credits.ISSUER_ROLE()
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, issuer, role));
         vm.prank(issuer);
         credits.issue(recipient, 100e18);
     }
