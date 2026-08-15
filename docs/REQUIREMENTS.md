@@ -129,7 +129,7 @@ authentication · KYC · provider payouts · mobile apps · notifications · dis
 
 | ID | Requirement | Priority | Verified by |
 |---|---|---|---|
-| FR-C-01 | Token reports name `CareCredits`, symbol `CARE`, and 18 decimals | MUST | `test_Metadata_ReturnsCorrectValues` |
+| FR-C-01 | Token reports name `CareCredits`, symbol `CCRD`, and 18 decimals | MUST | `test_Metadata_ReturnsCorrectValues` |
 | FR-C-02 | Supply cap is set at deployment and is immutable thereafter | MUST | `test_Cap_IsImmutableAfterDeployment` |
 | FR-C-03 | Total supply is zero immediately after deployment | MUST | `test_Deploy_InitialSupplyIsZero` |
 | FR-C-04 | An address holding `ISSUER_ROLE` can issue credits to any non-zero address | MUST | `test_Issue_MintsCreditsToRecipient` |
@@ -496,15 +496,18 @@ stars. There are no users. Saying so plainly is itself a signal.
 
 | # | Question | Owner | Blocks |
 |---|---|---|---|
-| OQ-01 | Confirm symbol `CARE` — is anything conflicting on the testnet? | Pargat | Session 03 |
-| OQ-02 | Cap value. Proposal: **10,000,000 CARE** ($10M CAD of liability) — large enough to be realistic, small enough to be meaningful | Pargat | Session 03 |
-| OQ-03 | Should partial redemption of a booking be allowed, or all-or-nothing? | Pargat | FR-C-09 |
-| OQ-04 | Should a funder be able to fund more than one recipient from one account? | Pargat | FR-F-04 |
-| OQ-05 | Who holds `PROVIDER_ROLE` in the demo — operator only, or one demo provider address? | Pargat | Session 09 |
+| OQ-01 | ~~Confirm symbol~~ **Resolved (Session 03, D-1):** symbol is **`CCRD`** | Pargat | — |
+| OQ-02 | ~~Cap value~~ **Resolved (Session 03, D-2):** cap is **100,000,000 CCRD** (`100_000_000e18`), not the 10,000,000 originally proposed | Pargat | — |
+| OQ-03 | ~~Partial redemption~~ **Resolved (Session 03, D-3):** all-or-nothing — partial redemption reverts | Pargat | — |
+| OQ-04 | ~~One funder, many recipients~~ **Resolved (Session 03, D-4):** allowed implicitly, and an explicit NON-requirement — the contract models no funder↔recipient link | Pargat | — |
+| OQ-05 | ~~Who holds `PROVIDER_ROLE`~~ **Resolved (Session 03, D-5):** the operator address **plus** exactly one labelled demo-provider address, both granted by the deploy script | Pargat | — |
 | OQ-06 | Does the senior app need a phone-only path, or is tablet sufficient for v1? | Pargat | FR-S scope |
 
 Open questions are recorded rather than guessed. An invented requirement becomes an
 invented test and then invented code.
+
+Resolutions D-1…D-8 are recorded in full, with rationale, in
+`specs/contract/carecredits-token.md` §3. OQ-06 remains open.
 
 ---
 
